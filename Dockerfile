@@ -44,4 +44,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Wait for external services and start application
-CMD ["sh", "-c", "sleep 10 && node src/server.js"]
+CMD ["sh", "-c", "echo 'Starting Node.js application...' && sleep 10 && echo 'Environment check:' && echo 'REDIS_HOST=' $REDIS_HOST && echo 'REDIS_PORT=' $REDIS_PORT && echo 'REDIS_PASSWORD=' $REDIS_PASSWORD && echo 'DB_HOST=' $DB_HOST && echo 'MINIO_ENDPOINT=' $MINIO_ENDPOINT && node src/server.js"]
