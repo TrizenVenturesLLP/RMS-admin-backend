@@ -31,10 +31,7 @@ const ProductImage = sequelize.define('ProductImage', {
   },
   url: {
     type: DataTypes.STRING,
-    allowNull: false,
-    validate: {
-      isUrl: true
-    }
+    allowNull: false
   },
   altText: {
     type: DataTypes.STRING,
