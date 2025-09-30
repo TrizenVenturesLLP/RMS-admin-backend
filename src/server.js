@@ -87,6 +87,37 @@ app.get('/health', (req, res) => {
   });
 });
 
+// MinIO status check endpoint
+app.get('/api/v1/minio-status', async (req, res) => {
+  try {
+    const { minioClient } = await import('./config/minio.js');
+    const bucketName = process.env.MINIO_BUCKET_NAME || 'riders-moto-media';
+    
+    // Test MinIO connection
+    await minioClient.listBuckets();
+    
+    // Check if bucket exists
+    const bucketExists = await minioClient.bucketExists(bucketName);
+    
+    res.json({
+      success: true,
+      message: 'MinIO connection successful',
+      bucketName,
+      bucketExists,
+      endpoint: process.env.MINIO_ENDPOINT,
+      port: process.env.MINIO_PORT
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'MinIO connection failed',
+      error: error.message,
+      endpoint: process.env.MINIO_ENDPOINT,
+      port: process.env.MINIO_PORT
+    });
+  }
+});
+
 // API routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/products', productRoutes);

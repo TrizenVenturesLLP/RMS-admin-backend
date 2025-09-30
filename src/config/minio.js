@@ -18,7 +18,10 @@ const minioClient = new Client({
   port: parseInt(MINIO_PORT) || 9000,
   useSSL: MINIO_USE_SSL === 'true',
   accessKey: MINIO_ACCESS_KEY || 'minioadmin',
-  secretKey: MINIO_SECRET_KEY || 'minioadmin'
+  secretKey: MINIO_SECRET_KEY || 'minioadmin',
+  // Add SSL configuration for production
+  region: 'us-east-1',
+  transportAgent: MINIO_USE_SSL === 'true' ? undefined : undefined
 });
 
 // Initialize MinIO bucket

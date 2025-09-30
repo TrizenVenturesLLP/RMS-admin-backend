@@ -200,20 +200,34 @@ export const serveMedia = asyncHandler(async (req, res) => {
   try {
     const bucketName = process.env.MINIO_BUCKET_NAME || 'riders-moto-media';
     
+    console.log('🔍 Attempting to serve media file:', filename);
+    console.log('📦 MinIO Bucket:', bucketName);
+    console.log('🌐 MinIO Endpoint:', process.env.MINIO_ENDPOINT);
+    console.log('🔑 MinIO Access Key:', process.env.MINIO_ACCESS_KEY ? 'Set' : 'Not set');
+    
     // Check if file exists in MinIO
     try {
+      console.log('🔍 Checking if file exists in MinIO...');
       await minioClient.statObject(bucketName, filename);
+      console.log('✅ File exists in MinIO');
     } catch (error) {
+      console.error('❌ MinIO statObject error:', error);
       if (error.code === 'NotFound') {
+        console.log('📄 File not found in MinIO');
         return res.status(404).json({
           success: false,
           message: 'File not found'
         });
       }
-      throw error;
+      console.error('❌ MinIO connection error:', error.message);
+      return res.status(500).json({
+        success: false,
+        message: 'MinIO connection error: ' + error.message
+      });
     }
 
     // Get file stream from MinIO
+    console.log('📥 Getting file stream from MinIO...');
     const stream = await minioClient.getObject(bucketName, filename);
     
     // Set appropriate headers
@@ -222,14 +236,15 @@ export const serveMedia = asyncHandler(async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
     res.setHeader('Access-Control-Allow-Origin', '*');
     
+    console.log('✅ Streaming file to client');
     // Pipe the stream to response
     stream.pipe(res);
     
   } catch (error) {
-    console.error('Error serving media file:', error);
+    console.error('❌ Error serving media file:', error);
     res.status(500).json({
       success: false,
-      message: 'Error serving file'
+      message: 'Error serving file: ' + error.message
     });
   }
 });
