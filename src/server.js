@@ -129,8 +129,15 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/media', mediaRoutes);
 
-// Public media routes (no authentication required)
-app.use('/api/v1/public/media', publicMediaRoutes);
+// Public media routes (no authentication required) - with permissive CORS
+app.use('/api/v1/public/media', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  next();
+}, publicMediaRoutes);
 
 // API documentation endpoint
 app.get('/api/v1/docs', (req, res) => {
