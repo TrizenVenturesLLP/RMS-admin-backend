@@ -19,6 +19,7 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "build": "docker build -f Dockerfile.prod -t riders-moto-backend:latest .",
+    "build:prod": "docker build -f Dockerfile.prod -t riders-moto-backend:latest .",
     "deploy": "chmod +x deploy.sh && ./deploy.sh",
     "logs": "docker-compose -f docker-compose.prod.yml logs -f",
     "stop": "docker-compose -f docker-compose.prod.yml down",
