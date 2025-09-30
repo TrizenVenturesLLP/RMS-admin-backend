@@ -23,6 +23,7 @@ import brandRoutes from './routes/brands.js';
 import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
 import mediaRoutes from './routes/media.js';
+import publicMediaRoutes from './routes/publicMedia.js';
 
 // Load environment variables
 dotenv.config();
@@ -94,6 +95,9 @@ app.use('/api/v1/brands', brandRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/media', mediaRoutes);
+
+// Public media routes (no authentication required)
+app.use('/api/v1/public/media', publicMediaRoutes);
 
 // API documentation endpoint
 app.get('/api/v1/docs', (req, res) => {
