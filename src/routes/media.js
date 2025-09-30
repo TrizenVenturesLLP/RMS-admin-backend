@@ -4,17 +4,22 @@ import {
   getMediaItem,
   uploadMedia,
   deleteMedia,
-  updateMedia
+  updateMedia,
+  serveMedia
 } from '../controllers/mediaController.js';
 import { authenticateToken, requireStaff } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
-// All routes require authentication
+// Public route for serving media files (no authentication required)
+// This must come before the protected routes to avoid conflicts
+router.get('/file/:filename', serveMedia);
+
+// All other routes require authentication
 router.use(authenticateToken);
 
-// Public routes (authenticated users)
+// Protected routes (authenticated users)
 router.get('/', getMedia);
 router.get('/:id', getMediaItem);
 

@@ -1,6 +1,7 @@
 import { Media, User } from '../models/index.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { Op } from 'sequelize';
+import { minioClient } from '../config/minio.js';
 
 // @desc    Get all media
 // @route   GET /api/v1/media
@@ -183,10 +184,80 @@ export const deleteMedia = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Serve media file publicly
+// @route   GET /api/v1/media/:filename
+// @access  Public
+export const serveMedia = asyncHandler(async (req, res) => {
+  const { filename } = req.params;
+  
+  if (!filename) {
+    return res.status(400).json({
+      success: false,
+      message: 'Filename is required'
+    });
+  }
+
+  try {
+    const bucketName = process.env.MINIO_BUCKET_NAME || 'riders-moto-media';
+    
+    // Check if file exists in MinIO
+    try {
+      await minioClient.statObject(bucketName, filename);
+    } catch (error) {
+      if (error.code === 'NotFound') {
+        return res.status(404).json({
+          success: false,
+          message: 'File not found'
+        });
+      }
+      throw error;
+    }
+
+    // Get file stream from MinIO
+    const stream = await minioClient.getObject(bucketName, filename);
+    
+    // Set appropriate headers
+    const contentType = getContentType(filename);
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    // Pipe the stream to response
+    stream.pipe(res);
+    
+  } catch (error) {
+    console.error('Error serving media file:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error serving file'
+    });
+  }
+});
+
+// Helper function to determine content type based on file extension
+const getContentType = (filename) => {
+  const ext = filename.toLowerCase().split('.').pop();
+  const contentTypes = {
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'webp': 'image/webp',
+    'svg': 'image/svg+xml',
+    'pdf': 'application/pdf',
+    'mp4': 'video/mp4',
+    'avi': 'video/x-msvideo',
+    'mov': 'video/quicktime'
+  };
+  
+  return contentTypes[ext] || 'application/octet-stream';
+};
+
 export default {
   getMedia,
   getMediaItem,
   uploadMedia,
   updateMedia,
-  deleteMedia
+  deleteMedia,
+  serveMedia
 };
