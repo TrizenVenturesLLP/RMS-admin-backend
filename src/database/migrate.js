@@ -8,8 +8,17 @@ const migrate = async () => {
     // Test database connection
     await testConnection();
     
-    // Sync all models with force to recreate tables
-    await sequelize.sync({ force: true });
+    // Import all models to ensure they're registered
+    import('../models/index.js');
+    
+    // Sync all models - use alter for production safety
+    const isProduction = process.env.NODE_ENV === 'production';
+    const syncOptions = isProduction 
+      ? { alter: true }  // Safe for production - only adds missing columns/tables
+      : { force: true }; // Development - recreates everything
+    
+    console.log(`Using sync option: ${JSON.stringify(syncOptions)}`);
+    await sequelize.sync(syncOptions);
     
     console.log('✅ Database migration completed successfully');
     process.exit(0);

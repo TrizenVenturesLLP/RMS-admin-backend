@@ -11,6 +11,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "migrate": "node src/database/migrate.js",
+    "migrate:prod": "NODE_ENV=production node src/database/migrate-production.js",
+    "check-tables": "node src/database/check-tables.js",
     "seed": "node src/database/seed.js",
     "setup": "node setup.js",
     "lint": "eslint src/",
