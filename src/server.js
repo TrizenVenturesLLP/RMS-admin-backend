@@ -38,9 +38,11 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
     },
   },
+  // Disable nosniff for media files to allow proper image loading
+  noSniff: false,
 }));
 
 // CORS configuration - temporarily permissive for development
