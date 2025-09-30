@@ -26,6 +26,17 @@ else
     echo "💡 If you see database errors, the tables may need to be created manually"
 fi
 
+# Create admin user
+echo "👤 Creating admin user..."
+NODE_ENV=production node create-admin-user.js
+
+# Check if admin user creation was successful
+if [ $? -eq 0 ]; then
+    echo "✅ Admin user setup completed"
+else
+    echo "⚠️  Admin user creation had issues, but continuing with application startup"
+fi
+
 # Start the application
 echo "🚀 Starting application server..."
 exec node src/server.js
