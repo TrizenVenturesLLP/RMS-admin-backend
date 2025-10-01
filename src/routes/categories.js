@@ -1,11 +1,13 @@
 import express from 'express';
 import {
+  getCategoryTree,
   getCategories,
   getCategory,
   createCategory,
   updateCategory,
   deleteCategory,
-  getCategoryProducts
+  getCategoryProducts,
+  getCategoriesWithCounts
 } from '../controllers/categoryController.js';
 import { authenticateToken, requireStaff } from '../middleware/auth.js';
 import { validate, schemas } from '../middleware/validation.js';
@@ -13,6 +15,8 @@ import { validate, schemas } from '../middleware/validation.js';
 const router = express.Router();
 
 // Public routes
+router.get('/tree', getCategoryTree); // MUST come before /:id route
+router.get('/with-counts', getCategoriesWithCounts); // MUST come before /:id route
 router.get('/', getCategories);
 router.get('/:id', getCategory);
 router.get('/:id/products', getCategoryProducts);

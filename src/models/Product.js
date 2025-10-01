@@ -141,6 +141,127 @@ const Product = sequelize.define('Product', {
   attributes: {
     type: DataTypes.JSON,
     allowNull: true
+  },
+  // NEW FIELDS FROM MIGRATION 001
+  vendorName: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'vendor_name'
+  },
+  manufacturer: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'manufacturer'
+  },
+  productType: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'product_type'
+  },
+  accessoryCategory: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'accessory_category'
+  },
+  compatibleBikes: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    field: 'compatible_bikes'
+  },
+  compatibleModels: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    field: 'compatible_models'
+  },
+  isNewArrival: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: 'is_new_arrival'
+  },
+  isBestseller: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: 'is_bestseller'
+  },
+  isCombo: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: 'is_combo'
+  },
+  installationType: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'installation_type'
+  },
+  installationGuideUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    field: 'installation_guide_url'
+  },
+  installationVideoUrl: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    field: 'installation_video_url'
+  },
+  installationTimeMinutes: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'installation_time_minutes'
+  },
+  warrantyPeriod: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'warranty_period'
+  },
+  material: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'material'
+  },
+  color: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'color'
+  },
+  finish: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'finish'
+  },
+  specifications: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    field: 'specifications'
+  },
+  publishedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'published_at'
+  },
+  availableFrom: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'available_from'
+  },
+  availableUntil: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'available_until'
+  },
+  skuInternal: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'sku_internal'
+  },
+  barcode: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'barcode'
+  },
+  features: {
+    type: DataTypes.ARRAY(DataTypes.TEXT),
+    allowNull: true,
+    field: 'features'
   }
 }, {
   tableName: 'products',
@@ -161,11 +282,34 @@ const Product = sequelize.define('Product', {
 
 // Associations
 Product.associate = (models) => {
-  // Many-to-one relationship with category
+  // Many-to-one relationship with category (LEGACY - kept for backward compatibility)
   Product.belongsTo(models.Category, {
     as: 'category',
     foreignKey: 'categoryId',
     onDelete: 'SET NULL'
+  });
+  
+  // Many-to-many relationship with categories (NEW - primary way to handle categories)
+  Product.belongsToMany(models.Category, {
+    through: 'product_categories',
+    as: 'categories',
+    foreignKey: 'product_id',
+    otherKey: 'category_id'
+  });
+  
+  // One-to-many relationship with product_attributes (NEW - normalized attributes)
+  Product.hasMany(models.ProductAttribute, {
+    as: 'attributesList',
+    foreignKey: 'productId',
+    onDelete: 'CASCADE'
+  });
+  
+  // Many-to-many relationship with tags (NEW)
+  Product.belongsToMany(models.Tag, {
+    through: 'product_tags',
+    as: 'tagsList',
+    foreignKey: 'product_id',
+    otherKey: 'tag_id'
   });
   
   // Many-to-one relationship with brand

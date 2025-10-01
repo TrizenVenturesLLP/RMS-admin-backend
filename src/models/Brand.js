@@ -75,6 +75,27 @@ const Brand = sequelize.define('Brand', {
     validate: {
       len: [1, 160]
     }
+  },
+  // NEW FIELDS FROM MIGRATION 001
+  brandType: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'brand_type'
+  },
+  isFeatured: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: 'is_featured'
+  },
+  featuredOrder: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'featured_order'
+  },
+  bannerImage: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    field: 'banner_image'
   }
 }, {
   tableName: 'brands',

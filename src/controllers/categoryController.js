@@ -1,6 +1,51 @@
-import { Category, Product } from '../models/index.js';
+import { Category, Product, sequelize } from '../models/index.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { Op } from 'sequelize';
+
+// @desc    Get category tree (hierarchical structure for navigation)
+// @route   GET /api/v1/categories/tree
+// @access  Public
+export const getCategoryTree = asyncHandler(async (req, res) => {
+  const { includeInactive = false } = req.query;
+  
+  // Fetch all categories
+  const whereClause = {};
+  if (includeInactive !== 'true') {
+    whereClause.isActive = true;
+    whereClause.isVisibleInMenu = true;
+  }
+  
+  const allCategories = await Category.findAll({
+    where: whereClause,
+    attributes: ['id', 'name', 'slug', 'parentId', 'level', 'categoryType', 'icon', 'image', 'sortOrder', 'isActive'],
+    order: [['level', 'ASC'], ['sortOrder', 'ASC'], ['name', 'ASC']]
+  });
+  
+  // Build tree structure
+  const buildTree = (categories, parentId = null) => {
+    return categories
+      .filter(cat => cat.parentId === parentId)
+      .map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        level: cat.level,
+        categoryType: cat.categoryType,
+        icon: cat.icon,
+        image: cat.image,
+        sortOrder: cat.sortOrder,
+        isActive: cat.isActive,
+        children: buildTree(categories, cat.id)
+      }));
+  };
+  
+  const tree = buildTree(allCategories);
+  
+  res.json({
+    success: true,
+    data: { tree, totalCategories: allCategories.length }
+  });
+});
 
 // @desc    Get all categories
 // @route   GET /api/v1/categories
@@ -262,11 +307,110 @@ export const getCategoryProducts = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get categories with product counts
+// @route   GET /api/v1/categories/with-counts
+// @access  Public
+export const getCategoriesWithCounts = asyncHandler(async (req, res) => {
+  const { level, categoryType, parentId } = req.query;
+  
+  // Build where clause
+  const whereClause = {};
+  if (level) whereClause.level = parseInt(level);
+  if (categoryType) whereClause.categoryType = categoryType;
+  if (parentId) whereClause.parentId = parentId;
+  
+  // Get categories with product counts
+  const categories = await Category.findAll({
+    where: whereClause,
+    attributes: [
+      'id',
+      'name', 
+      'slug',
+      'description',
+      'level',
+      'categoryType',
+      'parentId',
+      'sortOrder',
+      'isActive',
+      'isVisibleInMenu',
+      'icon',
+      'bannerImage',
+      'featuredOrder'
+    ],
+    include: [
+      {
+        model: Product,
+        as: 'productsList',
+        attributes: ['id'],
+        through: { attributes: [] } // Don't include join table attributes
+      },
+      {
+        model: Category,
+        as: 'children',
+        attributes: ['id', 'name', 'slug', 'level'],
+        required: false
+      },
+      {
+        model: Category,
+        as: 'parent',
+        attributes: ['id', 'name', 'slug', 'level'],
+        required: false
+      }
+    ],
+    order: [
+      ['level', 'ASC'],
+      ['sortOrder', 'ASC'],
+      ['name', 'ASC']
+    ]
+  });
+
+  // Transform the data to include product counts
+  const categoriesWithCounts = categories.map(category => {
+    const categoryData = category.toJSON();
+    
+    return {
+      id: categoryData.id,
+      name: categoryData.name,
+      slug: categoryData.slug,
+      description: categoryData.description,
+      level: categoryData.level,
+      categoryType: categoryData.categoryType,
+      parentId: categoryData.parentId,
+      sortOrder: categoryData.sortOrder,
+      isActive: categoryData.isActive,
+      isVisibleInMenu: categoryData.isVisibleInMenu,
+      icon: categoryData.icon,
+      bannerImage: categoryData.bannerImage,
+      featuredOrder: categoryData.featuredOrder,
+      productCount: categoryData.productsList ? categoryData.productsList.length : 0,
+      children: categoryData.children || [],
+      parent: categoryData.parent || null,
+      createdAt: categoryData.createdAt,
+      updatedAt: categoryData.updatedAt
+    };
+  });
+
+  res.json({
+    success: true,
+    data: {
+      categories: categoriesWithCounts,
+      total: categoriesWithCounts.length,
+      summary: {
+        totalCategories: categoriesWithCounts.length,
+        categoriesWithProducts: categoriesWithCounts.filter(cat => cat.productCount > 0).length,
+        totalProducts: categoriesWithCounts.reduce((sum, cat) => sum + cat.productCount, 0)
+      }
+    }
+  });
+});
+
 export default {
+  getCategoryTree,
   getCategories,
   getCategory,
   createCategory,
   updateCategory,
   deleteCategory,
-  getCategoryProducts
+  getCategoryProducts,
+  getCategoriesWithCounts
 };

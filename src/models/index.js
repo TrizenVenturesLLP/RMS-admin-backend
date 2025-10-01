@@ -7,6 +7,10 @@ import Brand from './Brand.js';
 import Product from './Product.js';
 import ProductImage from './ProductImage.js';
 import ProductVariant from './ProductVariant.js';
+import ProductCategory from './ProductCategory.js';
+import ProductAttribute from './ProductAttribute.js';
+import Tag from './Tag.js';
+import ProductTag from './ProductTag.js';
 import Order from './Order.js';
 import OrderItem from './OrderItem.js';
 import Media from './Media.js';
@@ -19,6 +23,10 @@ const models = {
   Product,
   ProductImage,
   ProductVariant,
+  ProductCategory,
+  ProductAttribute,
+  Tag,
+  ProductTag,
   Order,
   OrderItem,
   Media
@@ -40,6 +48,10 @@ export {
   Product,
   ProductImage,
   ProductVariant,
+  ProductCategory,
+  ProductAttribute,
+  Tag,
+  ProductTag,
   Order,
   OrderItem,
   Media
