@@ -37,6 +37,17 @@ else
     echo "⚠️  Admin user creation had issues, but continuing with application startup"
 fi
 
+# Seed production data
+echo "🌱 Seeding production data..."
+NODE_ENV=production node seed-production-data.js
+
+# Check if data seeding was successful
+if [ $? -eq 0 ]; then
+    echo "✅ Production data seeding completed"
+else
+    echo "⚠️  Data seeding had issues, but continuing with application startup"
+fi
+
 # Start the application
 echo "🚀 Starting application server..."
 exec node src/server.js
