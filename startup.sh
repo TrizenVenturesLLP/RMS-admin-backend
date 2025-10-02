@@ -37,13 +37,13 @@ else
     echo "⚠️  Admin user creation had issues, but continuing with application startup"
 fi
 
-# Seed production data
-echo "🌱 Seeding production data..."
-NODE_ENV=production node seed-production-data.js
+# Seed complete HT Exhaust production data
+echo "🌱 Seeding complete HT Exhaust production data..."
+NODE_ENV=production node seed-complete-htexhaust-production.js
 
 # Check if data seeding was successful
 if [ $? -eq 0 ]; then
-    echo "✅ Production data seeding completed"
+    echo "✅ Complete HT Exhaust production data seeding completed"
 else
     echo "⚠️  Data seeding had issues, but continuing with application startup"
 fi
