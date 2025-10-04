@@ -13,29 +13,27 @@ const {
   DB_URL
 } = process.env;
 
-// Database configuration
+// Database configuration - Uses production database for all environments
 const config = {
   development: {
-    host: DB_HOST || 'localhost',
-    port: DB_PORT || 5432,
-    database: DB_NAME || 'riders_moto_shop',
-    username: DB_USER || 'postgres',
-    password: DB_PASSWORD || 'password',
+    url: DB_URL,
     dialect: 'postgres',
-    logging: console.log,
+    logging: console.log, // Enable logging for development
     pool: {
-      max: 5,
-      min: 0,
+      max: 10,
+      min: 2,
       acquire: 30000,
       idle: 10000
+    },
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     }
   },
   test: {
-    host: DB_HOST || 'localhost',
-    port: DB_PORT || 5432,
-    database: `${DB_NAME || 'riders_moto_shop'}_test`,
-    username: DB_USER || 'postgres',
-    password: DB_PASSWORD || 'password',
+    url: DB_URL,
     dialect: 'postgres',
     logging: false,
     pool: {
@@ -43,6 +41,12 @@ const config = {
       min: 0,
       acquire: 30000,
       idle: 10000
+    },
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     }
   },
   production: {

@@ -54,16 +54,26 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
 }));
 
-// Rate limiting
+// Rate limiting - more lenient in development
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === 'development' 
+    ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000  // 1000 requests in development
+    : parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,  // 100 requests in production
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.'
+  },
+  skip: (req) => {
+    // Skip rate limiting for health checks and development
+    return req.path === '/health' || process.env.NODE_ENV === 'development';
   }
 });
-app.use(limiter);
+
+// Only apply rate limiting in production
+if (process.env.NODE_ENV !== 'development') {
+  app.use(limiter);
+}
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -171,8 +181,24 @@ const startServer = async () => {
     
     await testDatabase();
     await testMinIO();
-    await testRedis();
-    await testEmailConfig();
+    
+    // Skip Redis in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('⚠️  Skipping Redis in development environment');
+    } else {
+      try {
+        await testRedis();
+      } catch (error) {
+        console.log('⚠️  Redis connection failed, continuing without Redis');
+      }
+    }
+    
+    // Skip email config test in development (SMTP not configured)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('⚠️  Skipping email configuration test in development');
+    } else {
+      await testEmailConfig();
+    }
     
     console.log('✅ All connections successful');
     

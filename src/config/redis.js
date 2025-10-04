@@ -45,6 +45,12 @@ redisClient.on('end', () => {
 
 // Test Redis connection
 const testConnection = async () => {
+  // Skip Redis in development if host is not accessible
+  if (process.env.NODE_ENV === 'development' && REDIS_HOST && REDIS_HOST.includes('srv-captain')) {
+    console.log('⚠️  Skipping Redis connection in development (external host not accessible)');
+    return;
+  }
+  
   try {
     console.log('🔍 Redis connection details:');
     console.log(`Host: ${REDIS_HOST || 'localhost'}`);

@@ -30,9 +30,8 @@ A comprehensive backend API for the Riders Moto Shop ecosystem, built with Node.
 Before running the application, make sure you have the following installed:
 
 - Node.js 18 or higher
-- PostgreSQL 12 or higher
-- Redis 6 or higher
-- MinIO server
+
+**Note:** The application uses production services (PostgreSQL, Redis, MinIO) hosted on CapRover. No local services are required.
 
 ## 🔧 Installation
 
@@ -42,30 +41,13 @@ Before running the application, make sure you have the following installed:
    cd riders-moto-backend
    ```
 
-2. **Install dependencies**
+2. **Run setup**
    ```bash
-   npm install
+   npm run setup
    ```
+   This will install dependencies and create the .env file from the production template.
 
-3. **Set up environment variables**
-   ```bash
-   cp env.example .env
-   ```
-   Edit `.env` with your configuration.
-
-4. **Set up the database**
-   ```bash
-   # Create PostgreSQL database
-   createdb riders_moto_shop
-   
-   # Run migrations
-   npm run migrate
-   
-   # Seed the database (optional)
-   npm run seed
-   ```
-
-5. **Start the server**
+3. **Start the server**
    ```bash
    # Development
    npm run dev
@@ -74,55 +56,30 @@ Before running the application, make sure you have the following installed:
    npm start
    ```
 
+**Note:** The application is configured to use production services (database, Redis, MinIO) for both local and production environments. No local database setup is required.
+
 ## 🌐 Environment Variables
 
-Create a `.env` file with the following variables:
+The application uses a unified configuration that connects to production services. The `.env` file is automatically created from `env.production` during setup.
 
-```env
-# Server Configuration
-NODE_ENV=development
-PORT=3000
-API_VERSION=v1
+**Key Configuration:**
+- **Database**: External PostgreSQL on CapRover (port 5433)
+- **Redis**: Production Redis on CapRover
+- **MinIO**: Production MinIO on CapRover
+- **Port**: 3001 (development), 80 (production)
 
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=riders_moto_shop
-DB_USER=postgres
-DB_PASSWORD=your_password
+**Note**: External PostgreSQL access requires port mapping configuration. See `EXTERNAL_DB_SETUP.md` for setup instructions.
 
-# JWT Configuration
-JWT_SECRET=your_super_secret_jwt_key_here
-JWT_EXPIRE=7d
-JWT_REFRESH_SECRET=your_refresh_token_secret
-JWT_REFRESH_EXPIRE=30d
+**Environment-based URLs:**
+- **Development**: `http://localhost:3001`
+- **Production**: `https://rmsadminbackend.llp.trizenventures.com`
 
-# MinIO Configuration
-MINIO_ENDPOINT=localhost
-MINIO_PORT=9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-MINIO_BUCKET_NAME=riders-moto-media
-
-# Redis Configuration
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# Email Configuration
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-
-# Payment Gateway
-STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
-```
 
 ## 📚 API Documentation
 
 ### Base URL
 ```
-http://localhost:3000/api/v1
+http://localhost:3001/api/v1
 ```
 
 ### Authentication Endpoints
@@ -175,21 +132,14 @@ Authorization: Bearer <your-jwt-token>
 
 ## 🚀 Deployment
 
-### Docker Deployment
-```bash
-# Build the image
-docker build -t riders-moto-backend .
-
-# Run the container
-docker run -p 3000:3000 riders-moto-backend
-```
+### CapRover Deployment
+The application is deployed on CapRover using the `captain-definition` file.
 
 ### Environment Setup
-1. Set up PostgreSQL database
-2. Configure MinIO server
-3. Set up Redis instance
-4. Configure environment variables
-5. Run database migrations
+1. Application uses production services automatically
+2. No local database setup required
+3. Environment variables are pre-configured
+4. No migrations needed - database is already set up
 
 ## 🧪 Testing
 
@@ -206,38 +156,23 @@ npm run test:watch
 - `npm start` - Start production server
 - `npm run dev` - Start development server
 - `npm test` - Run tests
-- `npm run migrate` - Run database migrations
-- `npm run seed` - Seed database with sample data
+- `npm run create-admin` - Create admin user
+- `npm run setup` - Initial setup (install deps, create .env)
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
 
 ## 🔧 External Integrations
 
-### Required Services
-1. **PostgreSQL Database**
-   - Install PostgreSQL
-   - Create database: `riders_moto_shop`
-   - Update connection string in `.env`
+The application uses production services hosted on CapRover:
 
-2. **MinIO Server**
-   - Download and install MinIO
-   - Start MinIO server
-   - Create bucket: `riders-moto-media`
-
-3. **Redis Server**
-   - Install Redis
-   - Start Redis server
-   - Configure connection in `.env`
-
-4. **Email Service**
-   - Configure SMTP settings
-   - For Gmail: Use App Password
-   - Update email configuration in `.env`
+### Production Services
+1. **PostgreSQL Database** - `srv-captain--rms-postgres`
+2. **Redis Cache** - `srv-captain--rms-redis`
+3. **MinIO Storage** - `rms-minio-api.llp.trizenventures.com`
 
 ### Optional Integrations
 - **Stripe**: For payment processing
-- **Elasticsearch**: For advanced search
-- **CDN**: For file delivery optimization
+- **Email Service**: SMTP configuration for notifications
 
 ## 🛡️ Security Features
 

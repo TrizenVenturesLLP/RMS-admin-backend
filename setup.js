@@ -11,9 +11,9 @@ console.log('=====================================\n');
 if (!fs.existsSync('.env')) {
   console.log('📝 Creating .env file from template...');
   try {
-    fs.copyFileSync('env.example', '.env');
-    console.log('✅ .env file created successfully');
-    console.log('⚠️  Please update the .env file with your configuration\n');
+    fs.copyFileSync('env.production', '.env');
+    console.log('✅ .env file created successfully from env.production');
+    console.log('✅ Application configured to use production services\n');
   } catch (error) {
     console.error('❌ Failed to create .env file:', error.message);
     process.exit(1);
@@ -46,20 +46,18 @@ try {
 
 console.log('🎉 Setup completed successfully!');
 console.log('\n📋 Next Steps:');
-console.log('1. Update your .env file with correct database and service credentials');
-console.log('2. Start PostgreSQL, Redis, and MinIO services');
-console.log('3. Run database migration: npm run migrate');
-console.log('4. Seed the database: npm run seed');
-console.log('5. Start the development server: npm run dev');
+console.log('1. The application is configured to use production services');
+console.log('2. No local database setup required');
+console.log('3. Start the development server: npm run dev');
+console.log('4. Create admin user (optional): npm run create-admin');
 console.log('\n🔗 Useful Commands:');
 console.log('- npm run dev          # Start development server');
-console.log('- npm run migrate      # Run database migrations');
-console.log('- npm run seed         # Seed database with sample data');
+console.log('- npm run create-admin # Create admin user');
 console.log('- npm test             # Run tests');
 console.log('- npm run lint         # Run ESLint');
 console.log('\n📚 Documentation:');
-console.log('- API Documentation: http://localhost:3000/api/v1/docs');
-console.log('- Health Check: http://localhost:3000/health');
+console.log('- API Documentation: http://localhost:3001/api/v1/docs');
+console.log('- Health Check: http://localhost:3001/health');
 console.log('\n🆘 Need Help?');
 console.log('- Check the README.md file for detailed instructions');
-console.log('- Ensure all external services (PostgreSQL, Redis, MinIO) are running');
+console.log('- Application uses production database and services');
