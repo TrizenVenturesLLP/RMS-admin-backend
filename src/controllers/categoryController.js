@@ -404,6 +404,191 @@ export const getCategoriesWithCounts = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get all categories for admin (with pagination and filters)
+// @route   GET /api/v1/categories/admin
+// @access  Private (Staff/Admin)
+export const getCategoriesForAdmin = asyncHandler(async (req, res) => {
+  const {
+    page = 1,
+    limit = 20,
+    search,
+    level,
+    categoryType,
+    parentId,
+    isActive,
+    isVisibleInMenu,
+    sortBy = 'sortOrder',
+    sortOrder = 'ASC'
+  } = req.query;
+
+  // Build where clause
+  const whereClause = {};
+  
+  if (search) {
+    whereClause[Op.or] = [
+      { name: { [Op.iLike]: `%${search}%` } },
+      { description: { [Op.iLike]: `%${search}%` } }
+    ];
+  }
+  
+  if (level) whereClause.level = parseInt(level);
+  if (categoryType) whereClause.categoryType = categoryType;
+  if (parentId !== undefined) {
+    if (parentId === 'null' || parentId === '') {
+      whereClause.parentId = null;
+    } else {
+      whereClause.parentId = parentId;
+    }
+  }
+  if (isActive !== undefined) whereClause.isActive = isActive === 'true';
+  if (isVisibleInMenu !== undefined) whereClause.isVisibleInMenu = isVisibleInMenu === 'true';
+
+  // Calculate pagination
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+
+  const { count, rows: categories } = await Category.findAndCountAll({
+    where: whereClause,
+    include: [
+      {
+        model: Category,
+        as: 'parent',
+        attributes: ['id', 'name', 'slug'],
+        required: false
+      },
+      {
+        model: Category,
+        as: 'children',
+        attributes: ['id', 'name', 'slug'],
+        required: false
+      },
+      {
+        model: Product,
+        as: 'productsList',
+        attributes: ['id'],
+        through: { attributes: [] },
+        required: false
+      }
+    ],
+    order: [[sortBy, sortOrder.toUpperCase()]],
+    limit: parseInt(limit),
+    offset,
+    distinct: true
+  });
+
+  // Transform the data
+  const categoriesWithCounts = categories.map(category => {
+    const categoryData = category.toJSON();
+    
+    return {
+      id: categoryData.id,
+      name: categoryData.name,
+      slug: categoryData.slug,
+      description: categoryData.description,
+      level: categoryData.level,
+      categoryType: categoryData.categoryType,
+      parentId: categoryData.parentId,
+      sortOrder: categoryData.sortOrder,
+      isActive: categoryData.isActive,
+      isVisibleInMenu: categoryData.isVisibleInMenu,
+      icon: categoryData.icon,
+      bannerImage: categoryData.bannerImage,
+      featuredOrder: categoryData.featuredOrder,
+      productCount: categoryData.productsList ? categoryData.productsList.length : 0,
+      childrenCount: categoryData.children ? categoryData.children.length : 0,
+      parent: categoryData.parent || null,
+      createdAt: categoryData.createdAt,
+      updatedAt: categoryData.updatedAt
+    };
+  });
+
+  res.json({
+    success: true,
+    data: {
+      categories: categoriesWithCounts,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(count / parseInt(limit)),
+        totalItems: count,
+        itemsPerPage: parseInt(limit)
+      }
+    }
+  });
+});
+
+// @desc    Reorder categories
+// @route   PUT /api/v1/categories/reorder
+// @access  Private (Staff/Admin)
+export const reorderCategories = asyncHandler(async (req, res) => {
+  const { categories } = req.body; // Array of { id, sortOrder, parentId }
+
+  if (!Array.isArray(categories)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Categories must be an array'
+    });
+  }
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    for (const categoryUpdate of categories) {
+      await Category.update(
+        { 
+          sortOrder: categoryUpdate.sortOrder,
+          parentId: categoryUpdate.parentId || null
+        },
+        { 
+          where: { id: categoryUpdate.id },
+          transaction 
+        }
+      );
+    }
+
+    await transaction.commit();
+
+    res.json({
+      success: true,
+      message: 'Categories reordered successfully'
+    });
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+});
+
+// @desc    Bulk update categories
+// @route   PUT /api/v1/categories/bulk-update
+// @access  Private (Staff/Admin)
+export const bulkUpdateCategories = asyncHandler(async (req, res) => {
+  const { categoryIds, updates } = req.body;
+
+  if (!Array.isArray(categoryIds) || !updates) {
+    return res.status(400).json({
+      success: false,
+      message: 'Category IDs and updates are required'
+    });
+  }
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    await Category.update(updates, {
+      where: { id: { [Op.in]: categoryIds } },
+      transaction
+    });
+
+    await transaction.commit();
+
+    res.json({
+      success: true,
+      message: `Updated ${categoryIds.length} categories successfully`
+    });
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+});
+
 export default {
   getCategoryTree,
   getCategories,
@@ -412,5 +597,8 @@ export default {
   updateCategory,
   deleteCategory,
   getCategoryProducts,
-  getCategoriesWithCounts
+  getCategoriesWithCounts,
+  getCategoriesForAdmin,
+  reorderCategories,
+  bulkUpdateCategories
 };

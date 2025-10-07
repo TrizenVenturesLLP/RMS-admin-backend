@@ -1,26 +1,75 @@
+# Dependencies
 node_modules
-npm-debug.log
-.git
-.gitignore
-README.md
+npm-debug.log*
+
+# Environment files
 .env
 .env.local
 .env.development
 .env.test
-Dockerfile
-docker-compose.yml
-docker-compose.dev.yml
-.dockerignore
-coverage
-.nyc_output
-.cache
-dist
-build
+
+# Logs
+logs
 *.log
-.DS_Store
-Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# IDE files
 .vscode
 .idea
 *.swp
 *.swo
-*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Development files
+EXTERNAL_DB_SETUP.md
+QUICK_START.md
+seed-*.js
+create-admin-user.js
+setup.js
+crash-gaurd-pulsarn150.jpg
