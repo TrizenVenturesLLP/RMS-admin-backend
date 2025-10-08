@@ -14,6 +14,7 @@ export const getProducts = asyncHandler(async (req, res) => {
     order = 'DESC',
     category,
     brand,
+    model,
     minPrice,
     maxPrice,
     inStock,
@@ -25,11 +26,70 @@ export const getProducts = asyncHandler(async (req, res) => {
   const whereClause = { isActive: true };
 
   if (category) {
-    whereClause.categoryId = category;
+    // Find category by name or slug
+    const categoryRecord = await Category.findOne({
+      where: {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${category}%` } },
+          { slug: category }
+        ]
+      }
+    });
+    
+    if (categoryRecord) {
+      whereClause.categoryId = categoryRecord.id;
+    } else {
+      // If category not found, return empty results
+      return res.status(200).json({
+        success: true,
+        data: {
+          products: [],
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: 0,
+            totalItems: 0,
+            itemsPerPage: parseInt(limit)
+          }
+        }
+      });
+    }
   }
 
   if (brand) {
-    whereClause.brandId = brand;
+    // Find brand by name or slug
+    const brandRecord = await Brand.findOne({
+      where: {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${brand}%` } },
+          { slug: brand }
+        ]
+      }
+    });
+    
+    if (brandRecord) {
+      whereClause.brandId = brandRecord.id;
+    } else {
+      // If brand not found, return empty results
+      return res.status(200).json({
+        success: true,
+        data: {
+          products: [],
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: 0,
+            totalItems: 0,
+            itemsPerPage: parseInt(limit)
+          }
+        }
+      });
+    }
+  }
+
+  if (model) {
+    // Filter by compatible models using JSONB contains operator
+    whereClause.compatibleModels = {
+      [Op.contains]: [model]
+    };
   }
 
   if (minPrice || maxPrice) {

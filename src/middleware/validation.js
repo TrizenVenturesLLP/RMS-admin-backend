@@ -63,6 +63,7 @@ export const schemas = {
     dimensions: Joi.object().optional(),
     categoryId: Joi.string().uuid().optional().allow(''),
     brandId: Joi.string().uuid().optional().allow(''),
+    compatibleModels: Joi.array().items(Joi.string()).optional(),
     isActive: Joi.boolean().optional(),
     isDigital: Joi.boolean().optional(),
     isFeatured: Joi.boolean().optional(),
@@ -86,6 +87,7 @@ export const schemas = {
     dimensions: Joi.object().optional(),
     categoryId: Joi.string().uuid().optional(),
     brandId: Joi.string().uuid().optional(),
+    compatibleModels: Joi.array().items(Joi.string()).optional(),
     isActive: Joi.boolean().optional(),
     isDigital: Joi.boolean().optional(),
     isFeatured: Joi.boolean().optional(),
@@ -199,6 +201,7 @@ export const schemas = {
   productFilters: Joi.object({
     category: Joi.string().uuid().optional(),
     brand: Joi.string().uuid().optional(),
+    model: Joi.string().optional(),
     minPrice: Joi.number().min(0).optional(),
     maxPrice: Joi.number().min(0).optional(),
     inStock: Joi.boolean().optional(),
