@@ -107,11 +107,34 @@ export const getProducts = asyncHandler(async (req, res) => {
   }
 
   if (search) {
-    whereClause[Op.or] = [
+    // Enhanced search that includes brand, category, and compatible models
+    const searchConditions = [
       { name: { [Op.iLike]: `%${search}%` } },
       { description: { [Op.iLike]: `%${search}%` } },
-      { sku: { [Op.iLike]: `%${search}%` } }
+      { sku: { [Op.iLike]: `%${search}%` } },
+      { '$brand.name$': { [Op.iLike]: `%${search}%` } },
+      { '$category.name$': { [Op.iLike]: `%${search}%` } }
     ];
+
+    // Add compatible models search if search term looks like a model
+    // Check if search contains bike model patterns
+    const modelPattern = /^[A-Z0-9\-]+$/i;
+    if (modelPattern.test(search.trim())) {
+      searchConditions.push({
+        compatibleModels: {
+          [Op.contains]: [search.trim()]
+        }
+      });
+    }
+
+    // Add search in tags if they exist
+    searchConditions.push({
+      tags: {
+        [Op.contains]: [search]
+      }
+    });
+
+    whereClause[Op.or] = searchConditions;
   }
 
   // Calculate pagination
