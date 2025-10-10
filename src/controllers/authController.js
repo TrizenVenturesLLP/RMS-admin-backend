@@ -16,7 +16,7 @@ const {
 // @route   POST /api/v1/auth/register
 // @access  Public
 export const register = asyncHandler(async (req, res) => {
-  const { email, password, firstName, lastName, phone } = req.body;
+  const { email, password, firstName, lastName, phone, bikeBrand, bikeModel } = req.body;
 
   // Check if user already exists
   const existingUser = await User.findOne({ where: { email } });
@@ -37,6 +37,8 @@ export const register = asyncHandler(async (req, res) => {
     firstName,
     lastName,
     phone,
+    bikeBrand,
+    bikeModel,
     emailVerificationToken
   });
 

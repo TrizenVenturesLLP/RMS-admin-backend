@@ -44,6 +44,20 @@ const User = sequelize.define('User', {
       len: [10, 15]
     }
   },
+  bikeBrand: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [1, 50]
+    }
+  },
+  bikeModel: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [1, 50]
+    }
+  },
   role: {
     type: DataTypes.ENUM('admin', 'staff', 'customer'),
     defaultValue: 'customer',

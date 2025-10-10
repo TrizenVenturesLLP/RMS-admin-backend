@@ -23,6 +23,7 @@ import brandRoutes from './routes/brands.js';
 import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
 import mediaRoutes from './routes/media.js';
+import shippingRoutes from './routes/shipping.js';
 import publicMediaRoutes from './routes/publicMedia.js';
 
 // Load environment variables
@@ -138,6 +139,7 @@ app.use('/api/v1/brands', brandRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/media', mediaRoutes);
+app.use('/api/v1/shipping', shippingRoutes);
 
 // Public media routes (no authentication required) - with permissive CORS
 app.use('/api/v1/public/media', (req, res, next) => {

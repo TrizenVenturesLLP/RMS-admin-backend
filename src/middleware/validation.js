@@ -28,7 +28,9 @@ export const schemas = {
     password: Joi.string().min(6).required(),
     firstName: Joi.string().min(1).max(50).required(),
     lastName: Joi.string().min(1).max(50).required(),
-    phone: Joi.string().min(10).max(15).optional()
+    phone: Joi.string().min(10).max(15).optional(),
+    bikeBrand: Joi.string().min(1).max(50).optional(),
+    bikeModel: Joi.string().min(1).max(50).optional()
   }),
 
   login: Joi.object({
@@ -40,12 +42,24 @@ export const schemas = {
     firstName: Joi.string().min(1).max(50).optional(),
     lastName: Joi.string().min(1).max(50).optional(),
     phone: Joi.string().min(10).max(15).optional(),
+    bikeBrand: Joi.string().min(1).max(50).optional(),
+    bikeModel: Joi.string().min(1).max(50).optional(),
     profileImage: Joi.string().uri().optional()
   }),
 
   changePassword: Joi.object({
     currentPassword: Joi.string().required(),
     newPassword: Joi.string().min(6).required()
+  }),
+
+  // Shipping schemas
+  calculateShipping: Joi.object({
+    address: Joi.string().min(10).max(500).required(),
+    orderValue: Joi.number().min(0).optional()
+  }),
+
+  validateAddress: Joi.object({
+    address: Joi.string().min(10).max(500).required()
   }),
 
   // Product schemas
